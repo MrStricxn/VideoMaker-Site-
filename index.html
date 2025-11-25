@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VORTEX | Premium Video</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-body: #050505;
+            --bg-card: #121212;
+            --primary: #ff0055;
+            --accent-gradient: linear-gradient(135deg, #ff0055 0%, #ff00a0 100%);
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --nav-width: 240px;
+            --header-height: 70px;
+            --radius: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-body); color: var(--text-main); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        
+        /* Header */
+        header { position: fixed; top: 0; left: 0; right: 0; height: var(--header-height); background: rgba(5, 5, 5, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; z-index: 1000; }
+        .logo { font-size: 24px; font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        
+        .search-wrapper { flex: 1; max-width: 600px; margin: 0 40px; position: relative; display: none; }
+        @media(min-width: 768px) { .search-wrapper { display: block; } }
+        .search-wrapper input { width: 100%; background: #1a1a1a; border: 1px solid #333; padding: 12px 20px 12px 45px; border-radius: 50px; color: white; transition: 0.3s; }
+        .search-wrapper input:focus { border-color: var(--primary); background: black; outline: none; }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+        .header-actions { display: flex; gap: 15px; align-items: center; }
+        .btn-login { background: var(--accent-gradient); border: none; padding: 10px 24px; border-radius: 50px; color: white; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-login:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(255, 0, 85, 0.4); }
+        .icon-btn { background: transparent; border: none; color: white; font-size: 20px; cursor: pointer; padding: 8px; border-radius: 50%; transition: 0.3s; }
+        .icon-btn:hover { background: rgba(255,255,255,0.1); }
+        .user-profile { display: none; align-items: center; gap: 10px; cursor: pointer; }
+        .user-profile img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); }
+
+        /* Layout */
+        .layout { display: flex; padding-top: var(--header-height); min-height: 100vh; }
+        aside { width: var(--nav-width); background: var(--bg-body); padding: 20px 15px; position: fixed; top: var(--header-height); bottom: 0; overflow-y: auto; border-right: 1px solid rgba(255,255,255,0.05); display: none; }
+        @media(min-width: 1024px) { aside { display: block; } }
+        .nav-group { margin-bottom: 30px; }
+        .nav-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 10px; padding-left: 15px; }
+        aside a { display: flex; align-items: center; gap: 15px; padding: 12px 15px; border-radius: var(--radius); color: #d1d1d1; font-weight: 500; transition: 0.2s; }
+        aside a:hover, aside a.active { background: #1e1e1e; color: white; }
+        aside a.active { border-left: 3px solid var(--primary); }
+
+        main { flex: 1; padding: 30px; margin-left: 0; transition: 0.3s; }
+        @media(min-width: 1024px) { main { margin-left: var(--nav-width); } }
+
+        /* Filters */
+        .filters { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; }
+        .filters::-webkit-scrollbar { height: 4px; }
+        .filters::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        .chip { background: #222; border: 1px solid #333; padding: 8px 16px; border-radius: 20px; font-size: 14px; white-space: nowrap; cursor: pointer; transition: 0.3s; }
+        .chip:hover, .chip.active { background: white; color: black; border-color: white; }
+
+        /* Grid */
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+        
+        /* Card */
+        .video-card { cursor: pointer; transition: 0.3s; }
+        .thumbnail-wrapper { position: relative; border-radius: var(--radius); overflow: hidden; aspect-ratio: 16 / 9; }
+        .thumbnail-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+        .video-card:hover .thumbnail-wrapper img { transform: scale(1.08); filter: brightness(0.7); }
+        .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5); width: 60px; height: 60px; background: rgba(255, 0, 85, 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s; }
+        .video-card:hover .play-overlay { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .badge { position: absolute; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .duration { bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); }
+        .quality { top: 10px; left: 10px; background: #ffcc00; color: black; font-weight: 800; }
+
+        .meta { padding-top: 15px; display: flex; gap: 12px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #333; object-fit: cover; flex-shrink: 0; }
+        .title { font-size: 16px; font-weight: 600; margin-bottom: 6px; line-height: 1.3; color: #fff; }
+        .video-card:hover .title { color: var(--primary); }
+        .channel-name { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+        .stats { font-size: 13px; color: #666; margin-top: 3px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo" onclick="resetSearch()">
+            <i class="fa-solid fa-play-circle"></i> VORTEX
+        </div>
+        <div class="search-wrapper">
+            <i class="fa-solid fa-search search-icon"></i>
+            <input type="text" id="searchInput" placeholder="Поиск...">
+        </div>
+        <div class="header-actions">
+            <button class="icon-btn"><i class="fa-solid fa-upload"></i></button>
+            <button id="loginBtn" class="btn-login">ВОЙТИ</button>
+            <div id="userProfile" class="user-profile">
+                <span id="userName">User</span>
+                <img src="" id="userAvatar" alt="User">
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <aside>
+            <div class="nav-group">
+                <div class="nav-title">Меню</div>
+                <a href="#" class="active"><i class="fa-solid fa-house"></i> Главная</a>
+                <a href="#"><i class="fa-solid fa-fire"></i> Тренды</a>
+                <a href="#"><i class="fa-solid fa-crown"></i> Premium</a>
+            </div>
+        </aside>
+
+        <main>
+            <div class="filters" id="chipContainer">
+                <div class="chip active">Все</div>
+                <div class="chip">4K</div>
+                <div class="chip">Гейминг</div>
+                <div class="chip">Музыка</div>
+                <div class="chip">Спорт</div>
+            </div>
+
+            <h2 style="margin-bottom: 20px;">Рекомендуем вам 🔥</h2>
+            <div class="video-grid" id="videoContainer"></div>
+        </main>
+    </div>
+
+    <script>
+        const videoContainer = document.getElementById('videoContainer');
+        const searchInput = document.getElementById('searchInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const userProfile = document.getElementById('userProfile');
+        
+        // Загрузка видео с сервера
+        async function fetchVideos(query = '') {
+            try {
+                const res = await fetch(`/api/videos?q=${query}`);
+                const videos = await res.json();
+                renderVideos(videos);
+            } catch (e) {
+                videoContainer.innerHTML = '<p style="color:red">Ошибка загрузки...</p>';
+            }
+        }
+
+        function renderVideos(videos) {
+            videoContainer.innerHTML = '';
+            if(!videos.length) return videoContainer.innerHTML = '<p>Ничего не найдено</p>';
+
+            videos.forEach(v => {
+                const el = document.createElement('div');
+                el.className = 'video-card';
+                el.innerHTML = `
+                    <div class="thumbnail-wrapper">
+                        <img src="${v.thumbnail}" loading="lazy">
+                        <div class="badge quality">${v.quality}</div>
+                        <div class="badge duration">${v.duration}</div>
+                        <div class="play-overlay"><i class="fa-solid fa-play" style="color:white; font-size:24px;"></i></div>
+                    </div>
+                    <div class="meta">
+                        <img src="${v.avatar}" class="avatar">
+                        <div>
+                            <div class="title">${v.title}</div>
+                            <div class="channel-name">${v.author} <i class="fa-solid fa-check-circle" style="color:#3b82f6;"></i></div>
+                            <div class="stats">${v.views} • ${v.time}</div>
+                        </div>
+                    </div>
+                `;
+                el.onclick = () => alert(`Play: ${v.title}`);
+                videoContainer.appendChild(el);
+            });
+        }
+
+        // Поиск
+        let timeout;
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fetchVideos(e.target.value), 300);
+        });
+
+        // Вход
+        loginBtn.onclick = async () => {
+            const res = await fetch('/api/login', { method: 'POST' });
+            const data = await res.json();
+            if(data.success) {
+                loginBtn.style.display = 'none';
+                userProfile.style.display = 'flex';
+                document.getElementById('userName').innerText = data.user;
+                document.getElementById('userAvatar').src = data.avatar;
+            }
+        }
+
+        // Фильтры
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.onclick = function() {
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                const q = this.innerText === 'Все' ? '' : this.innerText;
+                fetchVideos(q);
+            }
+        });
+
+        function resetSearch() {
+            searchInput.value = '';
+            fetchVideos();
+        }
+
+        // Старт
+        fetchVideos();
+    </script>
+</body>
+</html>
